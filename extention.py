@@ -58,16 +58,14 @@ def generate_data():
 
         tenracs.append((
             i, fake.name(), fake.email(), fake.phone_number(), 
-            fake.street_address(), 
-            random.choice(rangs)[0] if random.random() > 0.5 else None,
-            code_rfid, 
-            random.choice(rangs)[0] if random.random() > 0.8 else None,
+            fake.street_address(),
+            None,
             dignite,
             random.choice(rangs)[0] if random.random() > 0.5 else None,
             grade,
-            random.choice(titres)[0] if random.random() > 0.7 else None,
-            random.choice([element[0] for element in organismes]) if random.random() > 0.3 else None,
-            random.choice([element[0] for element in organisations]) if random.random() > 0.8 else None
+            random.choice(titres)[0] if random.random() > 0.3 else None,
+            siret,
+            random.choice(organisations)[0] if random.random() > 0.8 else None
         ))
         
         if grade in ['Chevalier', 'Grand Chevalier']:
@@ -80,9 +78,9 @@ def generate_data():
     for i in range(1, NB_REPAS + 1):
         repas.append((
             i,
-            f"R-{i}", f"Festin {fake.word()}", 
-            fake.date_time_between(start_date='-2y', end_date='now').strftime('%Y-%m-%d %H:%M:%S'),
-            random.randint(1, 4999)
+            f"R-{i}, Festin {fake.word()}", 
+            fake.date_time_between(start_date='-2y', end_date='now'),
+            random.choice(adresses)[0]
         ))
 
     # 6. Machines et Entretiens
@@ -91,9 +89,9 @@ def generate_data():
     historique_entretiens = []
     for _ in range(NB_MACHINES * 2):
         historique_entretiens.append((
-            random.randint(1, NB_MACHINES),
-            random.randint(1, 200),
-            fake.date_time_between(start_date='-1y', end_date='now').strftime('%Y-%m-%d %H:%M:%S'),
+            random.choice(machines)[0],
+            random.choice(organisations)[0],
+            fake.date_time_between(start_date='-1y', end_date='now'),
             random.choice(maitres_ids) if maitres_ids else 1
         ))
 
@@ -111,10 +109,9 @@ def generate_data():
         insert(grades, connection, "Grade", "insert into Grade values (:1, :2)")
         insert(titres, connection, "Titre", "insert into Titre values (:1, :2)")
         insert(tenracs, connection, "Tenracs", "insert into Tenrac values (:1, :2, :3, :4, :5, :6, :7, :8, :9, :10, :11, :12)")
-        insert(repas, connection, "Repas", "insert into Repas values (:1, :2, :3, :4, :5)")
+        insert(repas, connection, "Repas", "insert into Repas values (:1, :2, :3, :4)")
         insert(machines, connection, "Machine", "insert into Machine values (:1, :2)")
         insert(historique_entretiens, connection, "Historique Entretien", "insert into Historique_Entretien values (:1, :2, :3, :4)")
-        insert(types_entretien, connection, "Type Entretien", "insert into Type_Entretien values (:1, :2)")
         insert(modeles, connection, "Modele", "insert into Modele values (:1, :2)")
         #insert(ingredients, connection, "Ingredient", "insert into Ingredient values (:1, :2)")
         #insert(sauces, connection, "Sauce", "insert into Sauce values (:1, :2)")
