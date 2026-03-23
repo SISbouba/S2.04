@@ -5,7 +5,7 @@ from datetime import datetime
 
 fake = Faker(['fr_FR'])
 
-HOST = "127.0.0.1"
+HOST = "147.94.228.190"
 PASSWORD = "02022007"
 
 # --- CONFIGURATION ---
@@ -58,11 +58,15 @@ def generate_data():
 
         tenracs.append((
             i, fake.name(), fake.email(), fake.phone_number(), 
-            fake.street_address(), code_rfid, dignite,
+            fake.street_address(), 
+            random.choice(rangs)[0] if random.random() > 0.5 else None,
+            code_rfid, 
+            random.choice(rangs)[0] if random.random() > 0.8 else None,
+            dignite,
             random.choice(rangs)[0] if random.random() > 0.5 else None,
             grade,
             random.choice(titres)[0] if random.random() > 0.7 else None,
-            None, None
+            organismes[0], None
         ))
         
         if grade in ['Chevalier', 'Grand Chevalier']:
@@ -106,6 +110,24 @@ def generate_data():
         insert(grades, connection, "Grade", "insert into Grade values (:1, :2)")
         insert(titres, connection, "Titre", "insert into Titre values (:1, :2)")
         insert(tenracs, connection, "Tenracs", "insert into Tenrac values (:1, :2, :3, :4, :5, :6, :7, :8, :9, :10, :11, :12)")
+        insert(repas, connection, "Repas", "insert into Repas values (:1, :2, :3, :4, :5)")
+        insert(machines, connection, "Machine", "insert into Machine values (:1, :2)")
+        insert(historique_entretiens, connection, "Historique Entretien", "insert into Historique_Entretien values (:1, :2, :3, :4)")
+        insert(types_entretien, connection, "Type Entretien", "insert into Type_Entretien values (:1, :2)")
+        insert(modeles, connection, "Modele", "insert into Modele values (:1, :2)")
+        #insert(ingredients, connection, "Ingredient", "insert into Ingredient values (:1, :2)")
+        #insert(sauces, connection, "Sauce", "insert into Sauce values (:1, :2)")
+        #insert(plats, connection, "Plat", "insert into Plat values (:1, :2, :3)")
+        #insert(est_associe, connection, "Est_Associe", "insert into Est_Associe values (:1, :2)")
+        #insert(utilise, connection, "Utilise", "insert into Utilise values (:1, :2)")
+        #insert(associe, connection, "Associe", "insert into Associe values (:1, :2)")
+        #insert(est_createur, connection, "Est_Createur", "insert into Est_Createur values (:1, :2)")
+        #insert(participe, connection, "Participe", "insert into Participe values (:1, :2)")
+        #insert(combineis, connection, "CombineIS", "insert into CombineIS values (:1, :2)")
+        #insert(combinesp, connection, "CombineSP", "insert into CombineSP values (:1, :2)")
+        #insert(combineip, connection, "CombineIP", "insert into CombineIP values (:1, :2)")
+        #insert(adresse_partenaire, connection, "Adresse_Partenaire", "insert into Adresse_Partenaire values (:1, :2)")
+
         connection.commit()
 
 def drop_tables():
