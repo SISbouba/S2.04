@@ -1,3 +1,5 @@
 LoopingImage.jpg
 .venv
 py*
+data/
+csv/
