@@ -10,6 +10,7 @@ from os import mkdir, path
 fake = Faker(['fr_FR'])
 fakef = FoodProvider(fake)
 
+# --- ORACLE DATABASE ---
 HOST = ""
 PASSWORD = ""
 USER = ""
