@@ -1,4 +1,4 @@
-import oracledb # Ou votre connecteur Oracle/PostgreSQL
+import oracledb
 import random
 from faker import Faker
 from faker_food import FoodProvider
@@ -14,7 +14,7 @@ PASSWORD = ""
 USER = ""
 
 # --- CONFIGURATION ---
-NB_TENRACS = 10 # Ajustez pour atteindre le million total cumulé
+NB_TENRACS = 10
 NB_REPAS = 100
 NB_MACHINES = 600
 NB_TERRITOIRE = 10
@@ -23,7 +23,6 @@ NB_ADRESSE = 2
 NB_PARTICIPE = 10
 
 def generate_data() -> tuple:
-    # Listes de constantes pour la cohérence métier
     grades = [
         ('Affilie', 1), ('Sympathisant', 2), ('Adhérent', 3), 
         ('Chevalier', 4), ('Grand Chevalier', 5), ('Commandeur', 6), ('Grand croix', 7)
@@ -38,7 +37,6 @@ def generate_data() -> tuple:
     entretiens = [(i, type_entretien[0], type_entretien[1]) for i, type_entretien in enumerate(types_entretien, start=1)]
 
     # 1. Tables de Référence (Petites)
-    # On génère ici les Grades, Rangs, etc.
     
     # 2. Organismes et Territoires
     territoires = [(i, fake.region().replace("'", ' ')) for i in range(1, NB_TERRITOIRE + 1)]
@@ -64,8 +62,8 @@ def generate_data() -> tuple:
 
     # 4. Tenracs (Le gros volume)
     tenracs = []
-    chevaliers_ids = [] # Utile pour les repas
-    maitres_ids = []    # Utile pour l'entretien
+    chevaliers_ids = []
+    maitres_ids = []
     
     for i in range(1, NB_TENRACS + 1):
         grade = random.choice(grades)[0]
@@ -101,7 +99,7 @@ def generate_data() -> tuple:
             random.choice(adresses)[0]
         ))
 
-    est_createur = [(idm, idr[0]) for idm in chevaliers_ids for idr in repas]
+    est_createur = [(random.choice(chevaliers_ids), element[0]) for element in repas]
 
     participe = list(set([(random.choice(tenracs)[0], random.choice(repas)[0]) for _ in range(NB_PARTICIPE)]))
 
@@ -123,7 +121,7 @@ def generate_data() -> tuple:
 
     associe = [(nom_mod[0], iden[0]) for nom_mod in modeles for iden in entretiens]
 
-        # 7 generation plats, sauces, ingredients, et leurs associations
+    # 7 generation plats, sauces, ingredients, et leurs associations
     unique_plat = set()
     for _ in range(1000):
         unique_plat.add(fakef.dish().replace("'", ' '))
@@ -282,6 +280,7 @@ def insert_sql(data, table, sql):
     print("Finished", table)
 
 if __name__ == "__main__":
+
     NB_TENRACS = eval(input("Number of tenrac: "))
     NB_MACHINES = eval(input("Number of machine: "))
     NB_REPAS = eval(input("Number of repas: "))
@@ -289,6 +288,7 @@ if __name__ == "__main__":
     NB_ORGANISME_ASSOCIE = eval(input("Number of organisme associe: "))
     NB_ADRESSE = eval(input("Number of adresse: "))
     NB_PARTICIPE = eval(input("Number of participe: "))
+
     a = time()
     print("--- GENERATION DATA STARTED ---")
     data = generate_data()
