@@ -3,3 +3,4 @@ LoopingImage.jpg
 py*
 data/
 csv/
+.DS_Store
