@@ -258,20 +258,12 @@ def insert_oracle(data, table, sql):
         print("Finished " + table)
 
 def insert_csv(data, table, sql):
-
-    if not path.exists("csv"):
-        mkdir("csv")
-
     with open("csv/"+table+".csv", "w") as file:
         wr = csv.writer(file, quoting=csv.QUOTE_NONNUMERIC)
         wr.writerows(data)
     print("Finished", table)
 
 def insert_sql(data, table, sql):
-
-    if not path.exists("sql"):
-        mkdir('sql')
-
     insert = sql.split('(')[0]
     result = ""
     for element in data:
@@ -289,6 +281,12 @@ def insert_sql(data, table, sql):
     print("Finished", table)
 
 if __name__ == "__main__":
+
+    if not path.exists("csv"):
+        mkdir("csv")
+
+    if not path.exists("sql"):
+        mkdir('sql')
 
     NB_TENRACS = eval(input("Number of tenrac: "))
     NB_MACHINES = eval(input("Number of machine: "))
