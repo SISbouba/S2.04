@@ -6,6 +6,7 @@ from datetime import datetime
 import csv
 from time import time
 from os import mkdir, path
+import numpy as np
 
 fake = Faker(['fr_FR'])
 fakef = FoodProvider(fake)
@@ -23,12 +24,34 @@ NB_TERRITOIRE = 10
 NB_ORGANISME_ASSOCIE = 100
 NB_ADRESSE = 2
 NB_PARTICIPE = 10
+NB_CLUB = 10
+NB_ORDRE = 10
 
 def generate_data() -> tuple:
     grades = [
         ('Affilie', 1), ('Sympathisant', 2), ('Adhérent', 3), 
         ('Chevalier', 4), ('Grand Chevalier', 5), ('Commandeur', 6), ('Grand croix', 7)
     ]
+
+    grades_list = []
+
+    distribution = {
+        'Affilie': 0.30,
+        'Sympathisant': 0.25,
+        'Adhérent': 0.20,
+        'Chevalier': 0.10,
+        'Grand Chevalier': 0.07,
+        'Commandeur': 0.05,
+        'Grand croix': 0.03
+    }
+
+    grades = list(distribution.keys())
+    probas = list(distribution.values())
+
+    grades_list = np.random.choice(grades, size=NB_TENRACS, p=probas)
+
+    grades_list = grades_list.tolist()
+
     rangs = [('Novice', 1), ('Compagnon', 2)]
     titres = [('Philanthrope', 1), ('Protecteur', 2), ('Honorable', 3)]
     dignites = [('Maître', 1), ('Grand Chancelier', 2), ('Grand Maître', 3)]
@@ -47,13 +70,19 @@ def generate_data() -> tuple:
 
     # 3. Organisations, Ordre et Clubs
     organisations = []
-    for i in range(1, 5):
+    for i in range(1, NB_ORDRE + 1):
         organisations.append((i, f"L Ordre du Tenrac {fake.name().replace("'", ' ')}", "Ordre", random.randint(1, NB_TERRITOIRE)))
-    for i in range(6, 201):
+    for i in range(NB_ORDRE + 1, NB_CLUB + NB_ORDRE + 1):
         organisations.append((i, f"Club Tenrac {fake.city().replace("'", ' ')}", "Club", random.randint(1, NB_TERRITOIRE)))
 
+    values = np.random.rand(len(organisations))
+    probas = values / values.sum()
+
+    organisations_list = np.random.choice([element[0] for element in organisations], size=NB_TENRACS, p=probas)
+    organisations_list = organisations_list.tolist()
+
     ordres = [(element[0],) for element in organisations if element[2] == "Ordre"]
-    club = [(element[0], random.randrange(1, 5)) for element in organisations if element[2] == "Club"]
+    club = [(element[0], random.choice(ordres)[0]) for element in organisations if element[2] == "Club"]
 
     uniques = set()
     while len(uniques) < 15:
@@ -68,12 +97,10 @@ def generate_data() -> tuple:
     maitres_ids = []
     
     for i in range(1, NB_TENRACS + 1):
-        grade = random.choice(grades)[0]
+        grade = grades_list.pop()
         dignite = random.choice(dignites)[0] if random.random() > 0.8 else None
         
-        # Logique métier : code personnel RFID
         siret = random.choice(organismes)[0]
-        idO = random.randint(1, 200)
 
         tenracs.append((
             i, fake.name().replace("'", ' '), fake.email().replace("'", ' '), fake.phone_number().replace("'", ' '), 
@@ -84,9 +111,9 @@ def generate_data() -> tuple:
             grade,
             random.choice(titres)[0] if random.random() > 0.3 else None,
             siret,
-            random.choice(organisations)[0] if random.random() > 0.8 else None
+            organisations_list.pop()
         ))
-        
+
         if grade in ['Chevalier', 'Grand Chevalier']:
             chevaliers_ids.append(i)
         if dignite == 'Maître':
@@ -164,13 +191,13 @@ def generate_data() -> tuple:
     unique_sauces = set(sauces_list)
     sauces = [(i, name) for i, name in enumerate(unique_sauces, start=1)]
 
-    contient = [(idr[0], nom_plat[0]) for idr in repas for nom_plat in plats if random.random() > 0.5]
+    contient = [(idr[0], random.choice(plats)[0]) for idr in repas]
 
-    combineis = [(idi[0], ids[0]) for idi in ingredients for ids in sauces if random.random() > 0.5]
+    combineis = [(idi[0], random.choice(sauces)[0]) for idi in ingredients if random.random() > 0.5]
 
-    combinesp = [(nom_plat[0], idi[0]) for idi in sauces for nom_plat in plats]
+    combinesp = [(random.choice(plats)[0], idi[0]) for idi in sauces]
 
-    combineip = [(nom_plat[0], idi[0]) for idi in ingredients for nom_plat in plats if random.random() > 0.5]
+    combineip = [(random.choice(plats)[0], idi[0]) for idi in ingredients]
 
     return (territoires, organismes, adresses, organisations, dignites, rangs, grades, titres, tenracs, repas, machines, historique_entretiens, modeles, ordres, club, plats, ingredients, sauces, est_associe, utilise, entretiens, associe, est_createur, participe, adresses_partenaire, contient, combineis, combinesp, combineip)
 
@@ -296,6 +323,8 @@ if __name__ == "__main__":
     NB_ORGANISME_ASSOCIE = eval(input("Number of organisme associe: "))
     NB_ADRESSE = eval(input("Number of adresse: "))
     NB_PARTICIPE = eval(input("Number of participe: "))
+    NB_CLUB = eval(input("Number of club: "))
+    NB_ORDRE = eval(input("Number of ordre: "))
 
     a = time()
     print("--- GENERATION DATA STARTED ---")
