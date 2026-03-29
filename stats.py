@@ -10,6 +10,7 @@ contient = pd.read_csv("csv/Contient.csv", header=None).rename(columns={0: "idR"
 combineIP = pd.read_csv("csv/CombineIP.csv", header=None).rename(columns={0: "nom_plat", 1: "idI"})
 ingredient = pd.read_csv("csv/Ingredient.csv", header=None).rename(columns={0: "idI", 2: "est_legume"})
 repas = pd.read_csv("csv/Repas.csv", header=None).rename(columns={0: "idR", 2: "Date"})
+participe = pd.read_csv("csv/Participe.csv", header=None).rename(columns={0: "idT", 1: "idR"})
 
 tenracs_grades = tenracs.merge(grades, on="nom_grade").groupby("nom_grade")
 
@@ -41,7 +42,7 @@ contient_combineip_ingredient_sans_legume = contient_combineip_ingredient.loc[co
 repas_sans_legume = repas.merge(contient_combineip_ingredient_sans_legume, on="idR")
 
 dates = pd.to_datetime(repas_sans_legume["Date"]).dt.month
-repas_month = repas_legume.groupby(dates).size()
+repas_month = repas_sans_legume.groupby(dates).size()
 
 ax2.plot(repas_month.index, repas_month.values, 
          color='#2A9D8F',
@@ -86,6 +87,69 @@ ax2.set_ylabel("Nombre d'inscrits", fontsize=12)
 ax2.set_xticks(ax2.get_xticks())
 
 ax2.set_xticklabels(ax2.get_xticklabels(), rotation=45, ha='right')
+
+plt.tight_layout()
+plt.show()
+
+fig, ax = plt.subplots(figsize=(12, 7), facecolor='#FAFAFA')
+
+stats_plats = contient.groupby("nom_plat")["idR"].nunique().reset_index()
+stats_plats = stats_plats.rename(columns={"idR": "nb_apparitions"})
+
+top_10_plats = stats_plats.sort_values(by="nb_apparitions", ascending=False).head(10)
+
+top_10_plats = top_10_plats.sort_values(by="nb_apparitions", ascending=True)
+
+barres = ax.barh(top_10_plats["nom_plat"].astype(str), 
+                 top_10_plats["nb_apparitions"], 
+                 color="#8E44AD",
+                 height=0.65,
+                 zorder=3)
+
+ax.bar_label(barres, padding=8, fontsize=11, fontweight='bold', color='#333333')
+plt.title("Top 10 des plats les plus fréquents", fontsize=18, fontweight='bold', color='#2C3E50', pad=20, loc='left')
+
+plt.xlabel("Nombre d'apparitions", fontsize=12, color='#7F8C8D', labelpad=10)
+plt.show()
+
+fig, ax = plt.subplots(figsize=(10, 7), facecolor='#FAFAFA')
+ax.set_facecolor('#FAFAFA')
+
+stats_complexite = contient_combineip_ingredient.groupby("nom_plat").agg(
+    nb_ingredients=('idI', 'nunique'),
+    a_un_legume=('est_legume', 'max')
+).reset_index()
+
+stats_complexite["categorie"] = stats_complexite["a_un_legume"].apply(
+    lambda x: "Avec légume(s)" if x == 1 else "Sans légume"
+)
+
+donnees_avec_legumes = stats_complexite[stats_complexite["categorie"] == "Avec légume(s)"]["nb_ingredients"].tolist()
+donnees_sans_legumes = stats_complexite[stats_complexite["categorie"] == "Sans légume"]["nb_ingredients"].tolist()
+
+valeurs_a_tracer = [donnees_sans_legumes, donnees_avec_legumes]
+etiquettes = ["Plats sans légume", "Plats avec légume(s)"]
+
+box = ax.boxplot(valeurs_a_tracer, 
+                 labels=etiquettes, 
+                 patch_artist=True, 
+                 widths=0.5,
+                 zorder=3,
+                 medianprops={'color': '#2C3E50', 'linewidth': 2},
+                 whiskerprops={'color': '#7F8C8D', 'linewidth': 1.5},
+                 capprops={'color': '#7F8C8D', 'linewidth': 1.5},
+                 flierprops={'marker': 'o', 'markerfacecolor': '#E74C3C', 'markersize': 6, 'markeredgecolor': 'none'})
+
+couleurs_box = ['#BDC3C7', '#2ECC71']
+for patch, color in zip(box['boxes'], couleurs_box):
+    patch.set_facecolor(color)
+    patch.set_edgecolor('#7F8C8D')
+    patch.set_linewidth(1.5)
+
+plt.title("Complexité des plats : Avec vs Sans Légumes", fontsize=16, fontweight='bold', color='#2C3E50', pad=20)
+plt.ylabel("Nombre total d'ingrédients par plat", fontsize=12, color='#7F8C8D', labelpad=10)
+
+plt.xticks(fontsize=12, fontweight='bold', color='#34495E')
 
 plt.tight_layout()
 plt.show()
