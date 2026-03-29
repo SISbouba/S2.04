@@ -5,12 +5,13 @@ couleurs = plt.cm.Set3.colors
 
 grades = pd.read_csv("csv/Grade.csv", header=None).rename(columns={0: "nom_grade"})
 tenracs = pd.read_csv("csv/Tenracs.csv", header=None).rename(columns={8: "nom_grade", 11: "idO", 0: "idT"})
-organisation = pd.read_csv("csv/Organisation.csv", header=None).rename(columns={0: "idO", 2: "type_organisation", 1: "nom_organisation"})
+organisation = pd.read_csv("csv/Organisation.csv", header=None).rename(columns={0: "idO", 2: "type_organisation", 1: "nom_organisation", 3: "idT_territoire"})
 contient = pd.read_csv("csv/Contient.csv", header=None).rename(columns={0: "idR", 1: "nom_plat"})
 combineIP = pd.read_csv("csv/CombineIP.csv", header=None).rename(columns={0: "nom_plat", 1: "idI"})
 ingredient = pd.read_csv("csv/Ingredient.csv", header=None).rename(columns={0: "idI", 2: "est_legume"})
 repas = pd.read_csv("csv/Repas.csv", header=None).rename(columns={0: "idR", 2: "Date"})
 participe = pd.read_csv("csv/Participe.csv", header=None).rename(columns={0: "idT", 1: "idR"})
+territoire = pd.read_csv("csv/Territoire.csv", header=None).rename(columns={0: "idT_territoire", 1: "nom_territoire"})
 
 tenracs_grades = tenracs.merge(grades, on="nom_grade").groupby("nom_grade")
 
@@ -151,5 +152,27 @@ plt.ylabel("Nombre total d'ingrédients par plat", fontsize=12, color='#7F8C8D',
 
 plt.xticks(fontsize=12, fontweight='bold', color='#34495E')
 
+plt.tight_layout()
+plt.show()
+
+df_terr = participe.merge(tenracs[["idT", "idO"]], on="idT")
+df_terr = df_terr.merge(organisation[["idO", "idT_territoire"]], on="idO")
+df_terr = df_terr.merge(territoire, on="idT_territoire")
+
+result_terr = df_terr.groupby("nom_territoire")["idR"].nunique().reset_index()
+result_terr = result_terr.rename(columns={"idR": "NB_REPAS"})
+result_terr = result_terr.sort_values(by="NB_REPAS", ascending=False)
+
+fig3, ax5 = plt.subplots(figsize=(10, 6))
+
+bars = ax5.bar(result_terr["nom_territoire"], result_terr["NB_REPAS"],
+               color="#1F77B4", edgecolor="black", alpha=0.85, zorder=3)
+
+ax5.grid(True, axis="y", linestyle="--", alpha=0.6, zorder=0)
+ax5.set_title("Nombre de repas par Territoire", fontsize=14, fontweight="bold")
+ax5.set_xlabel("Territoire", fontsize=12)
+ax5.set_ylabel("Nombre de repas distincts", fontsize=12)
+ax5.set_ylim(0, result_terr["NB_REPAS"].max() * 1.15)
+plt.xticks(rotation=30, ha="right")
 plt.tight_layout()
 plt.show()
